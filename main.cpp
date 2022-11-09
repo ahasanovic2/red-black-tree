@@ -166,12 +166,16 @@ int main() {
             case 1:
                 int vrijednost;
                 cout << "Odabrali ste kreiranje cvora." << endl;
-                cout << "Unesite vrijednost: ";
-                cin.clear();
-                cin.ignore();
-                cin >> vrijednost;
-                stablo.RBInsert(vrijednost);
-                cout << "Uspjesno uneseno " << vrijednost << " u stablo." << endl;
+                for (;;) {
+                    cout << "Unesite vrijednost (-9999 za izlaz): ";
+                    cin.clear();
+                    cin.ignore();
+                    cin >> vrijednost;
+                    if (vrijednost == -9999)
+                        break;
+                    stablo.RBInsert(vrijednost);
+                    cout << "Uspjesno uneseno " << vrijednost << " u stablo." << endl;
+                }
                 break;
             case 2:
                 cout << endl << "Odabrali ste InOrder ispis stabla. "<< endl;
