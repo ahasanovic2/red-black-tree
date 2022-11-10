@@ -135,7 +135,8 @@ class RBStablo {
             else {
                 RBTransplant(y,y->desni);
                 y->desni = z->desni;
-                y->desni->roditelj = y;
+                if (y->desni != nullptr)
+                    y->desni->roditelj = y;
             }
             RBTransplant(z,y);
             y->lijevi = z->lijevi;
