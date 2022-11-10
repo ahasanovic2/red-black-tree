@@ -30,7 +30,7 @@ struct Cvor {
 
 template <typename Tip>
 class RBStablo {
-    Cvor<Tip> *root;
+    Cvor<Tip> *root = nullptr;
 
     void RBInsertFixUp(Cvor<Tip>* &korijen, Cvor<Tip>* &novi) {
         while (novi != korijen && novi->boja != CRNO && novi->roditelj->boja == CRVENO) {
@@ -79,6 +79,129 @@ class RBStablo {
             inOrderPomocna(cvor->lijevi);
             cout << cvor->vrijednost << " ";
             inOrderPomocna(cvor->desni);
+        }
+    }
+
+    void RBTransplant(Cvor<Tip> *u, Cvor<Tip> *v) {
+        if (u != nullptr){
+            if (u->roditelj == nullptr)
+                root = v;
+            else if (u == u->roditelj->lijevi)
+                u->roditelj->lijevi = v;
+            else if (u->roditelj->desni = v)
+                v->roditelj = u->roditelj;
+
+            if (v != nullptr)
+                v->roditelj = u->roditelj;
+        }
+    }
+
+    Cvor<Tip>* tree_minimum (Cvor<Tip>* cvor) {
+        while (cvor->lijevi != nullptr)
+            cvor = cvor->lijevi;
+        return cvor;
+    }
+
+    bool pronalazakCvora(Cvor<Tip> *cvor, Tip v) {
+        if (cvor == nullptr)
+            return false;
+        else if (v < cvor->vrijednost)
+            pronalazakCvora(cvor->lijevi, v);
+        else if (v > cvor->vrijednost)
+            pronalazakCvora(cvor->desni, v);
+        else
+            brisanjeCvora(cvor);
+        return true;
+    }
+
+    void brisanjeCvora(Cvor<Tip> *z) {
+        Cvor<Tip>* x;
+        auto y = z;
+        Boje yOriginalBoja = y->boja;
+        if (z->lijevi == nullptr) {
+            x = z->desni;
+            RBTransplant(z,z->desni);
+        }
+        else if (z->desni == nullptr) {
+            x = z->lijevi;
+            RBTransplant(z,z->lijevi);
+        }
+        else {
+            y = tree_minimum(z->desni);
+            yOriginalBoja = y->boja;
+            x = y->desni;
+            if (y->roditelj == z && x != nullptr)
+                x->roditelj = y;
+            else {
+                RBTransplant(y,y->desni);
+                y->desni = z->desni;
+                y->desni->roditelj = y;
+            }
+            RBTransplant(z,y);
+            y->lijevi = z->lijevi;
+            y->lijevi->roditelj = y;
+            y->boja = z->boja;
+        }
+
+        if (yOriginalBoja == CRNO)
+            RBDeleteFixup(x);
+
+    }
+
+    void RBDeleteFixup(Cvor<Tip>* &x) {
+        while (x != nullptr && x != root && x->boja == CRNO) {
+            if (x->roditelj != nullptr && x == x->roditelj->lijevi) {
+                auto w = x->roditelj->desni;
+                if (w->boja == CRVENO) {
+                    w->boja = CRNO;
+                    x->roditelj->boja = CRVENO;
+                    leftRotate(x->roditelj);
+                    w = x->roditelj->desni;
+                }
+                if (w->lijevi->boja == CRNO && w->desni->boja == CRNO) {
+                    w->boja = CRVENO;
+                    x = x->roditelj;
+                }
+                else {
+                    if (w->desni->boja == CRNO) {
+                        w->lijevi->boja = CRNO;
+                        w->boja = CRVENO;
+                        rightRotate(w);
+                        w = x->roditelj->desni;
+                    }
+                    w->boja = x->roditelj->boja;
+                    x->roditelj->boja = CRNO;
+                    w->desni->boja = CRNO;
+                    leftRotate(x->roditelj);
+                    x = root;
+                }
+            }
+            else {
+                auto w = x->roditelj->lijevi;
+                if (w->boja == CRVENO) {
+                    w->boja = CRNO;
+                    x->roditelj->boja = CRVENO;
+                    rightRotate(x->roditelj);
+                    w = x->roditelj->lijevi;
+                }
+                if (w->desni->boja == CRNO && w->lijevi->boja == CRNO) {
+                    w->boja = CRVENO;
+                    x = x->roditelj;
+                }
+                else {
+                    if (w->lijevi->boja == CRNO) {
+                        w->desni->boja = CRNO;
+                        w->boja = CRVENO;
+                        leftRotate(w);
+                        w = x->roditelj->lijevi;
+                    }
+                    w->boja = x->roditelj->boja;
+                    x->roditelj->boja = CRNO;
+                    w->lijevi->boja = CRNO;
+                    rightRotate(x->roditelj);
+                    x = root;
+                }
+            }
         }
     }
 public:
@@ -145,12 +268,17 @@ public:
     void inOrder() {
         inOrderPomocna(this->root);
     }
+
+    bool RBDelete(Tip vrijednost) {
+        return pronalazakCvora(root,vrijednost);
+    }
 };
 
 int main() {
     vector<string> meni;
     meni.push_back("Ubacivanje elemenata");
     meni.push_back("InOrder ispis");
+    meni.push_back("Brisanje elementa");
     meni.push_back("EXIT");
 
     RBStablo<int> stablo;
@@ -184,6 +312,21 @@ int main() {
                 cout << endl << endl;
                 break;
             case 3:
+                cout << "Odabrali ste brisanje cvora." << endl;
+                for (;;) {
+                    cout << "Unesite vrijednost (-9999 za izlaz): ";
+                    cin.clear();
+                    cin.ignore();
+                    cin >> vrijednost;
+                    if (vrijednost == -9999)
+                        break;
+                    if (stablo.RBDelete(vrijednost))
+                        cout << endl << "Uspjesno izbrisan element. " << endl;
+                    else
+                        cout << endl << "Element nije izbrisan. " << endl;
+                }
+                break;
+            case 4:
                 cout << "Dosli ste do kraja programa. Dovidjenja!" << endl;
                 return 0;
             default:
