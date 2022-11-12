@@ -88,8 +88,8 @@ class RBStablo {
                 root = v;
             else if (u == u->roditelj->lijevi)
                 u->roditelj->lijevi = v;
-            else if (u->roditelj->desni = v)
-                v->roditelj = u->roditelj;
+            else
+                u->roditelj->desni = v;
 
             if (v != nullptr)
                 v->roditelj = u->roditelj;
