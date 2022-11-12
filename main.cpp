@@ -13,7 +13,7 @@ struct Cvor {
     Cvor *lijevi, *desni, *roditelj;
 
     // Konstruktor
-    Cvor(Tip v) {
+    explicit Cvor(Tip v) {
         vrijednost = v;
         boja = CRVENO;
         lijevi = desni = roditelj = nullptr;
@@ -33,7 +33,7 @@ class RBStablo {
     Cvor<Tip> *root = nullptr;
 
     void RBInsertFixUp(Cvor<Tip>* &korijen, Cvor<Tip>* &novi) {
-        while (novi != korijen && novi->boja != CRNO && novi->roditelj->boja == CRVENO) {
+        while (novi != korijen && novi->boja == CRVENO && novi->roditelj->boja == CRVENO) {
             if (novi->roditelj == novi->roditelj->roditelj->lijevi) {
                 auto y = novi->roditelj->roditelj->desni;
                 if (y != nullptr && y->boja == CRVENO) {
@@ -102,16 +102,19 @@ class RBStablo {
         return cvor;
     }
 
-    bool pronalazakCvora(Cvor<Tip> *cvor, Tip v) {
-        if (cvor == nullptr)
-            return false;
-        else if (v < cvor->vrijednost)
-            pronalazakCvora(cvor->lijevi, v);
+    void pronalazakCvora(Cvor<Tip> *&cvor, Tip v) {
+        if (cvor == nullptr) {
+            cout << endl <<"Elemet nije u stablu." << endl;
+            return;
+        }
+        if (v == cvor->vrijednost) {
+            brisanjeCvora(cvor);
+            cout << endl << "Uspjesno izbrisan element." << endl;
+        }
         else if (v > cvor->vrijednost)
             pronalazakCvora(cvor->desni, v);
         else
-            brisanjeCvora(cvor);
-        return true;
+            pronalazakCvora(cvor->lijevi, v);
     }
 
     void brisanjeCvora(Cvor<Tip> *z) {
@@ -270,24 +273,26 @@ public:
         inOrderPomocna(this->root);
     }
 
-    bool RBDelete(Tip vrijednost) {
+    void RBDelete(Tip vrijednost) {
         return pronalazakCvora(root,vrijednost);
     }
 };
 
 int main() {
     vector<string> meni;
-    meni.push_back("Ubacivanje elemenata");
-    meni.push_back("InOrder ispis");
-    meni.push_back("Brisanje elementa");
-    meni.push_back("EXIT");
+    meni.emplace_back("Ubacivanje elemenata");
+    meni.emplace_back("InOrder ispis");
+    meni.emplace_back("Brisanje elementa");
+    meni.emplace_back("Ubacivanje probnih elemenata iz postavke vjezbe");
+    meni.emplace_back("Brisanje probnih elemenata iz postavke vjezbe");
+    meni.emplace_back("EXIT");
 
     RBStablo<int> stablo;
 
     for (;;) {
-        for (int i = 0; i < meni.size(); ++i) {
+        for (int i = 0; i < meni.size(); ++i)
             cout << i+1 << ". " << meni[i] << endl;
-        }
+
         cout << "Unesite jednu od opcija: " << endl;
         int odabir;
         cin >> odabir;
@@ -321,13 +326,20 @@ int main() {
                     cin >> vrijednost;
                     if (vrijednost == -9999)
                         break;
-                    if (stablo.RBDelete(vrijednost))
-                        cout << endl << "Uspjesno izbrisan element. " << endl;
-                    else
-                        cout << endl << "Element nije izbrisan. " << endl;
+                    stablo.RBDelete(vrijednost);
                 }
                 break;
             case 4:
+                cout << "Odabrali ste unos elemenata iz postavke vjezbe." << endl;
+                for (auto x: vector<int>{6,11,10,2,9,7,5,13,22,27,36,12,31})
+                    stablo.RBInsert(x);
+                break;
+            case 5:
+                cout << "Odabrali ste brisanje elemenata iz postavke vjezbe." << endl;
+                for (auto x: vector<int>{5,27,36,12,11})
+                    stablo.RBDelete(x);
+                break;
+            case 6:
                 cout << "Dosli ste do kraja programa. Dovidjenja!" << endl;
                 return 0;
             default:
