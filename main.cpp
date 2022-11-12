@@ -30,9 +30,9 @@ struct Cvor {
 
 template <typename Tip>
 class RBStablo {
-    Cvor<Tip> *root = nullptr;
+    Cvor<Tip> *korijen = nullptr;
 
-    void RBInsertFixUp(Cvor<Tip>* &korijen, Cvor<Tip>* &novi) {
+    void RBInsertFixUp(Cvor<Tip>* &novi) {
         while (novi != korijen && novi->boja == CRVENO && novi->roditelj->boja == CRVENO) {
             if (novi->roditelj == novi->roditelj->roditelj->lijevi) {
                 auto y = novi->roditelj->roditelj->desni;
@@ -87,7 +87,7 @@ class RBStablo {
             return;
 
         if (u->roditelj == nullptr)
-            root = v;
+            korijen = v;
         else if (u == u->roditelj->lijevi)
             u->roditelj->lijevi = v;
         else
@@ -154,7 +154,7 @@ class RBStablo {
     }
 
     void RBDeleteFixup(Cvor<Tip>* &x) {
-        while (x != nullptr && x != root && x->boja == CRNO) {
+        while (x != nullptr && x != korijen && x->boja == CRNO) {
             if (x->roditelj != nullptr && x == x->roditelj->lijevi) {
                 auto w = x->roditelj->desni;
                 if (w->boja == CRVENO) {
@@ -178,7 +178,7 @@ class RBStablo {
                     x->roditelj->boja = CRNO;
                     w->desni->boja = CRNO;
                     leftRotate(x->roditelj);
-                    x = root;
+                    x = korijen;
                 }
             }
             else {
@@ -204,7 +204,7 @@ class RBStablo {
                     x->roditelj->boja = CRNO;
                     w->lijevi->boja = CRNO;
                     rightRotate(x->roditelj);
-                    x = root;
+                    x = korijen;
                 }
             }
         }
@@ -217,7 +217,7 @@ public:
             y->lijevi->roditelj = x;
         y->roditelj = x->roditelj;
         if (x->roditelj == nullptr)
-            root = y;
+            korijen = y;
         else if (x == x->roditelj->lijevi)
             x->roditelj->lijevi = y;
         else
@@ -233,7 +233,7 @@ public:
             y->lijevi->roditelj = y;
         x->roditelj = y->roditelj;
         if (y->roditelj == nullptr)
-            root = x;
+            korijen = x;
         else if (y == y->roditelj->lijevi)
             y->roditelj->lijevi = x;
         else
@@ -245,7 +245,7 @@ public:
     void RBInsert (Tip kljuc) {
         auto noviCvor = new Cvor<Tip>(kljuc);
         Cvor<Tip> *y = nullptr;
-        Cvor<Tip> *x = root;
+        Cvor<Tip> *x = korijen;
 
         while (x != nullptr) {
             y = x;
@@ -258,7 +258,7 @@ public:
         noviCvor->roditelj = y;
 
         if (y == nullptr)
-            root = noviCvor;
+            korijen = noviCvor;
         else if (noviCvor->vrijednost < y->vrijednost)
             y->lijevi = noviCvor;
         else
@@ -267,15 +267,15 @@ public:
         noviCvor->lijevi = noviCvor->desni = nullptr;
         noviCvor->boja = CRVENO;
 
-        RBInsertFixUp(root,noviCvor);
+        RBInsertFixUp(noviCvor);
     }
 
     void inOrder() {
-        inOrderPomocna(root);
+        inOrderPomocna(korijen);
     }
 
     void RBDelete(Tip vrijednost) {
-        return pronalazakCvora(root,vrijednost);
+        return pronalazakCvora(korijen, vrijednost);
     }
 };
 
