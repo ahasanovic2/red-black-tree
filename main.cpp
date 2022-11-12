@@ -83,17 +83,18 @@ class RBStablo {
     }
 
     void RBTransplant(Cvor<Tip> *u, Cvor<Tip> *v) {
-        if (u != nullptr){
-            if (u->roditelj == nullptr)
-                root = v;
-            else if (u == u->roditelj->lijevi)
-                u->roditelj->lijevi = v;
-            else
-                u->roditelj->desni = v;
+        if (u == nullptr)
+            return;
 
-            if (v != nullptr)
-                v->roditelj = u->roditelj;
-        }
+        if (u->roditelj == nullptr)
+            root = v;
+        else if (u == u->roditelj->lijevi)
+            u->roditelj->lijevi = v;
+        else
+            u->roditelj->desni = v;
+
+        if (v != nullptr)
+            v->roditelj = u->roditelj;
     }
 
     Cvor<Tip>* tree_minimum (Cvor<Tip>* cvor) {
@@ -242,7 +243,7 @@ public:
     }
 
     void RBInsert (Tip kljuc) {
-        auto *noviCvor = new Cvor<Tip>(kljuc);
+        auto noviCvor = new Cvor<Tip>(kljuc);
         Cvor<Tip> *y = nullptr;
         Cvor<Tip> *x = root;
 
@@ -270,7 +271,7 @@ public:
     }
 
     void inOrder() {
-        inOrderPomocna(this->root);
+        inOrderPomocna(root);
     }
 
     void RBDelete(Tip vrijednost) {
