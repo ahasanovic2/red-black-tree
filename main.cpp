@@ -245,7 +245,7 @@ public:
     void RBInsert (Tip kljuc) {
         auto noviCvor = new Cvor<Tip>(kljuc);
         Cvor<Tip> *y = nullptr;
-        Cvor<Tip> *x = korijen;
+        auto x = korijen;
 
         while (x != nullptr) {
             y = x;
