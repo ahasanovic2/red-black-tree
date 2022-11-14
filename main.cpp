@@ -22,9 +22,8 @@ struct Cvor {
     //Destruktor
     ~Cvor() {
         delete lijevi;
-        lijevi = nullptr;
         delete desni;
-        desni = nullptr;
+        desni = lijevi = nullptr;
     }
 };
 
@@ -150,7 +149,6 @@ class RBStablo {
 
         if (yOriginalBoja == CRNO)
             RBDeleteFixup(x);
-
     }
 
     void RBDeleteFixup(Cvor<Tip>* &x) {
@@ -302,11 +300,11 @@ int main() {
                 int vrijednost;
                 cout << "Odabrali ste kreiranje cvora." << endl;
                 for (;;) {
-                    cout << "Unesite vrijednost (-9999 za izlaz): ";
+                    cout << "Unesite vrijednost (bilo sta osim broja za izlaz): ";
                     cin.clear();
                     cin.ignore();
                     cin >> vrijednost;
-                    if (vrijednost == -9999)
+                    if (cin.fail())
                         break;
                     stablo.RBInsert(vrijednost);
                     cout << "Uspjesno uneseno " << vrijednost << " u stablo." << endl;
@@ -321,11 +319,11 @@ int main() {
             case 3:
                 cout << "Odabrali ste brisanje cvora." << endl;
                 for (;;) {
-                    cout << "Unesite vrijednost (-9999 za izlaz): ";
+                    cout << "Unesite vrijednost (bilo sta osim broja za izlaz): ";
                     cin.clear();
                     cin.ignore();
                     cin >> vrijednost;
-                    if (vrijednost == -9999)
+                    if (cin.fail())
                         break;
                     stablo.RBDelete(vrijednost);
                 }
