@@ -18,7 +18,7 @@ class RBStablo {
     Cvor<Tip> *korijen, *T_NIL;
 
     void RBInsertFixUp(Cvor<Tip>* k) {
-        Cvor<Tip>* u = new Cvor<Tip>();
+        Cvor<Tip>* u ;
         while (k->roditelj->boja == CRVENO) {
             if (k->roditelj == k->roditelj->roditelj->desni) {
                 u = k->roditelj->roditelj->lijevi;
@@ -159,8 +159,8 @@ class RBStablo {
                 cout << "L----";
                 indent += "   ";
             }
-            string sColor = cvor->boja ? "CRVENO" : "CRNO";
-            cout << cvor->vrijednost << "(" << sColor << ")" << endl;
+            string pomocni = cvor->boja ? "CRVENO" : "CRNO";
+            cout << cvor->vrijednost << "(" << pomocni << ")" << endl;
             printHelper(cvor->lijevi, indent, false);
             printHelper(cvor->desni, indent, true);
         }
