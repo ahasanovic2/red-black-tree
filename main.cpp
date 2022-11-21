@@ -4,152 +4,152 @@
 
 using namespace std;
 
-enum Boje { CRNO, CRVENO };
+enum Colors { BLACK, RED };
 
 template <typename Tip>
-struct Cvor {
-    Tip vrijednost;
-    Boje boja;
-    Cvor *lijevi, *desni, *roditelj;
+struct Node {
+    Tip value;
+    Colors color;
+    Node *left, *right, *parent;
 };
 
-template <typename Tip>
+template <typename Type>
 class RBStablo {
-    Cvor<Tip> *korijen, *T_NIL;
+    Node<Type> *root, *T_NIL;
 
-    void RBInsertFixUp(Cvor<Tip>* k) {
-        Cvor<Tip>* u ;
-        while (k->roditelj->boja == CRVENO) {
-            if (k->roditelj == k->roditelj->roditelj->desni) {
-                u = k->roditelj->roditelj->lijevi;
-                if (u->boja == CRVENO) {
-                    u->boja = CRNO;
-                    k->roditelj->boja = CRNO;
-                    k->roditelj->roditelj->boja = CRVENO;
-                    k = k->roditelj->roditelj;
+    void RBInsertFixUp(Node<Type>* k) {
+        Node<Type>* u ;
+        while (k->parent->color == RED) {
+            if (k->parent == k->parent->parent->right) {
+                u = k->parent->parent->left;
+                if (u->color == RED) {
+                    u->color = BLACK;
+                    k->parent->color = BLACK;
+                    k->parent->parent->color = RED;
+                    k = k->parent->parent;
                 }
                 else {
-                    if (k == k->roditelj->lijevi) {
-                        k = k->roditelj;
+                    if (k == k->parent->left) {
+                        k = k->parent;
                         rightRotate(k);
                     }
-                    k->roditelj->boja = CRNO;
-                    k->roditelj->roditelj->boja = CRVENO;
-                    leftRotate(k->roditelj->roditelj);
+                    k->parent->color = BLACK;
+                    k->parent->parent->color = RED;
+                    leftRotate(k->parent->parent);
                 }
             }
             else {
-                u = k->roditelj->roditelj->desni;
+                u = k->parent->parent->right;
 
-                if (u->boja) {
-                    u->boja = CRNO;
-                    k->roditelj->boja = CRNO;
-                    k->roditelj->roditelj->boja = CRVENO;
-                    k = k->roditelj->roditelj;
+                if (u->color) {
+                    u->color = BLACK;
+                    k->parent->color = BLACK;
+                    k->parent->parent->color = RED;
+                    k = k->parent->parent;
                 }
                 else {
-                    if (k == k->roditelj->desni) {
-                        k = k->roditelj;
+                    if (k == k->parent->right) {
+                        k = k->parent;
                         leftRotate(k);
                     }
-                    k->roditelj->boja = CRNO;
-                    k->roditelj->roditelj->boja = CRVENO;
-                    rightRotate(k->roditelj->roditelj);
+                    k->parent->color = BLACK;
+                    k->parent->parent->color = RED;
+                    rightRotate(k->parent->parent);
                 }
             }
-            if (k == korijen)
+            if (k == root)
                 break;
         }
-        korijen->boja = CRNO;
+        root->color = BLACK;
     }
 
-    void inOrderPomocna(Cvor<Tip>* cvor) {
-        if (cvor != T_NIL) {
-            inOrderPomocna(cvor->lijevi);
-            cout << cvor->vrijednost << " ";
-            string pomocni = cvor->boja ? "CRVENO" : "CRNO";
-            cout << "(" << pomocni << ") ";
-            inOrderPomocna(cvor->desni);
+    void inOrderHelper(Node<Type>* node) {
+        if (node != T_NIL) {
+            inOrderHelper(node->left);
+            cout << node->value << " ";
+            string helper = node->color ? "RED" : "BLACK";
+            cout << "(" << helper << ") ";
+            inOrderHelper(node->right);
         }
     }
 
-    void RBTransplant(Cvor<Tip> *u, Cvor<Tip> *v) {
-        if (u->roditelj == nullptr)
-            korijen = v;
-        else if (u == u->roditelj->lijevi)
-            u->roditelj->lijevi = v;
+    void RBTransplant(Node<Type> *u, Node<Type> *v) {
+        if (u->parent == nullptr)
+            root = v;
+        else if (u == u->parent->left)
+            u->parent->left = v;
         else
-            u->roditelj->desni = v;
-        v->roditelj = u->roditelj;
+            u->parent->right = v;
+        v->parent = u->parent;
     }
 
-    Cvor<Tip>* tree_minimum (Cvor<Tip>* cvor) {
-        while (cvor->lijevi != T_NIL)
-            cvor = cvor->lijevi;
-        return cvor;
+    Node<Type>* tree_minimum (Node<Type>* node) {
+        while (node->left != T_NIL)
+            node = node->left;
+        return node;
     }
 
-    void RBDeleteFixup(Cvor<Tip>* x) {
-        Cvor<Tip> *s;
-        while (x != korijen && x->boja == CRNO) {
-            if (x == x->roditelj->lijevi) {
-                s = x->roditelj->desni;
-                if (s->boja == CRVENO) {
-                    s->boja = CRNO;
-                    x->roditelj->boja = CRVENO;
-                    leftRotate(x->roditelj);
-                    s = x->roditelj->desni;
+    void RBDeleteFixup(Node<Type>* x) {
+        Node<Type> *s;
+        while (x != root && x->color == BLACK) {
+            if (x == x->parent->left) {
+                s = x->parent->right;
+                if (s->color == RED) {
+                    s->color = BLACK;
+                    x->parent->color = RED;
+                    leftRotate(x->parent);
+                    s = x->parent->right;
                 }
-                if (s->lijevi->boja == CRNO && s->desni->boja == CRNO) {
-                    s->boja = CRVENO;
-                    x = x->roditelj;
+                if (s->left->color == BLACK && s->right->color == BLACK) {
+                    s->color = RED;
+                    x = x->parent;
                 }
                 else {
-                    if (s->desni->boja == CRNO) {
-                        s->lijevi->boja = CRNO;
-                        s->boja = CRVENO;
+                    if (s->right->color == BLACK) {
+                        s->left->color = BLACK;
+                        s->color = RED;
                         rightRotate(s);
-                        s = x->roditelj->desni;
+                        s = x->parent->right;
                     }
-                    s->boja = x->roditelj->boja;
-                    x->roditelj->boja = CRNO;
-                    s->desni->boja = CRNO;
-                    leftRotate(x->roditelj);
-                    x = korijen;
+                    s->color = x->parent->color;
+                    x->parent->color = BLACK;
+                    s->right->color = BLACK;
+                    leftRotate(x->parent);
+                    x = root;
                 }
             }
             else {
-                s = x->roditelj->lijevi;
-                if (s->boja == CRVENO) {
-                    s->boja = CRNO;
-                    x->roditelj->boja = CRVENO;
-                    rightRotate(x->roditelj);
-                    s = x->roditelj->lijevi;
+                s = x->parent->left;
+                if (s->color == RED) {
+                    s->color = BLACK;
+                    x->parent->color = RED;
+                    rightRotate(x->parent);
+                    s = x->parent->left;
                 }
-                if (s->desni->boja == CRNO && s->lijevi->boja == CRNO) {
-                    s->boja = CRVENO;
-                    x = x->roditelj;
+                if (s->right->color == BLACK && s->left->color == BLACK) {
+                    s->color = RED;
+                    x = x->parent;
                 }
                 else {
-                    if (s->lijevi->boja == CRNO) {
-                        s->desni->boja = CRNO;
-                        s->boja = CRVENO;
+                    if (s->left->color == BLACK) {
+                        s->right->color = BLACK;
+                        s->color = RED;
                         leftRotate(s);
-                        s = x->roditelj->lijevi;
+                        s = x->parent->left;
                     }
-                    s->boja = x->roditelj->boja;
-                    x->roditelj->boja = CRNO;
-                    s->lijevi->boja = CRNO;
-                    rightRotate(x->roditelj);
-                    x = korijen;
+                    s->color = x->parent->color;
+                    x->parent->color = BLACK;
+                    s->left->color = BLACK;
+                    rightRotate(x->parent);
+                    x = root;
                 }
             }
         }
-        x->boja = CRNO;
+        x->color = BLACK;
     }
 
-    void printHelper(Cvor<Tip> *cvor, string indent, bool last) {
-        if (cvor != T_NIL) {
+    void printHelper(Node<Type> *node, string indent, bool last) {
+        if (node != T_NIL) {
             cout << indent;
             if (last) {
                 cout << "R----";
@@ -159,174 +159,159 @@ class RBStablo {
                 cout << "L----";
                 indent += "   ";
             }
-            string pomocni = cvor->boja ? "CRVENO" : "CRNO";
-            cout << cvor->vrijednost << "(" << pomocni << ")" << endl;
-            printHelper(cvor->lijevi, indent, false);
-            printHelper(cvor->desni, indent, true);
+            string helper = node->color ? "RED" : "BLACK";
+            cout << node->value << "(" << helper << ")" << endl;
+            printHelper(node->left, indent, false);
+            printHelper(node->right, indent, true);
         }
     }
 
-    void leftRotate(Cvor<Tip> *x) {
-        auto y = x->desni;
-        x->desni = y->lijevi;
-        if (y->lijevi != T_NIL)
-            y->lijevi->roditelj = x;
-        y->roditelj = x->roditelj;
-        if (x->roditelj == nullptr)
-            korijen = y;
-        else if (x == x->roditelj->lijevi)
-            x->roditelj->lijevi = y;
+    void leftRotate(Node<Type> *x) {
+        auto y = x->right;
+        x->right = y->left;
+        if (y->left != T_NIL)
+            y->left->parent = x;
+        y->parent = x->parent;
+        if (x->parent == nullptr)
+            root = y;
+        else if (x == x->parent->left)
+            x->parent->left = y;
         else
-            x->roditelj->desni = y;
-        y->lijevi = x;
-        x->roditelj = y;
+            x->parent->right = y;
+        y->left = x;
+        x->parent = y;
     }
 
-    void rightRotate(Cvor<Tip> *x) {
-        auto y = x->lijevi;
-        x->lijevi = y->desni;
-        if (y->desni != T_NIL)
-            y->desni->roditelj = x;
-        y->roditelj = x->roditelj;
-        if (x->roditelj == nullptr)
-            korijen = y;
-        else if (x == x->roditelj->desni)
-            x->roditelj->desni = y;
+    void rightRotate(Node<Type> *x) {
+        auto y = x->left;
+        x->left = y->right;
+        if (y->right != T_NIL)
+            y->right->parent = x;
+        y->parent = x->parent;
+        if (x->parent == nullptr)
+            root = y;
+        else if (x == x->parent->right)
+            x->parent->right = y;
         else
-            x->roditelj->lijevi = y;
-        y->desni = x;
-        x->roditelj = y;
-    }
-
-    Cvor<Tip>* SearchTreeHelper(Cvor<Tip>* cvor, Tip kljuc) {
-        if (cvor == T_NIL || kljuc == cvor->vrijednost)
-            return cvor;
-        if (kljuc < cvor->vrijednost)
-            return SearchTreeHelper(cvor->lijevi, kljuc);
-        return SearchTreeHelper(cvor->desni, kljuc);
+            x->parent->left = y;
+        y->right = x;
+        x->parent = y;
     }
 public:
     RBStablo() {
-        T_NIL = new Cvor<Tip>;
-        T_NIL->boja = CRNO;
-        T_NIL->lijevi = T_NIL->desni = nullptr;
-        korijen = T_NIL;
+        T_NIL = new Node<Type>;
+        T_NIL->color = BLACK;
+        T_NIL->left = T_NIL->right = nullptr;
+        root = T_NIL;
     }
 
-    void RBInsert (Tip kljuc) {
-        auto cvor = new Cvor<Tip>;
-        cvor->roditelj = nullptr;
-        cvor->vrijednost = kljuc;
-        cvor->lijevi = T_NIL;
-        cvor->desni = T_NIL;
-        cvor->boja = CRVENO;
+    void RBInsert (Type key) {
+        auto node = new Node<Type>;
+        node->parent = nullptr;
+        node->value = key;
+        node->left = T_NIL;
+        node->right = T_NIL;
+        node->color = RED;
 
-        Cvor<Tip>* y = nullptr;
-        Cvor<Tip>* x = this->korijen;
+        Node<Type>* y = nullptr;
+        Node<Type>* x = this->root;
 
         while (x != T_NIL) {
             y = x;
-            if (cvor->vrijednost < x->vrijednost)
-                x = x->lijevi;
+            if (node->value < x->value)
+                x = x->left;
             else
-                x = x->desni;
+                x = x->right;
         }
-        cvor->roditelj = y;
+        node->parent = y;
         if (y == nullptr)
-            korijen = cvor;
-        else if (cvor->vrijednost < y->vrijednost)
-            y->lijevi = cvor;
+            root = node;
+        else if (node->value < y->value)
+            y->left = node;
         else
-            y->desni = cvor;
+            y->right = node;
 
-        if (cvor->roditelj == nullptr) {
-            cvor->boja = CRNO;
+        if (node->parent == nullptr) {
+            node->color = BLACK;
             return;
         }
 
-        if (cvor->roditelj->roditelj == nullptr)
+        if (node->parent->parent == nullptr)
             return;
 
-        RBInsertFixUp(cvor);
+        RBInsertFixUp(node);
     }
 
     void inOrder() {
-        inOrderPomocna(korijen);
+        inOrderHelper(root);
     }
 
-    void RBDelete(Tip kljuc) {
+    void RBDelete(Type key) {
         auto z = T_NIL;
-        auto cvor = korijen;
-        Cvor<Tip> *x, *y;
-        while (cvor != T_NIL) {
-            if (cvor->vrijednost == kljuc)
-                z = cvor;
+        auto node = root;
+        Node<Type> *x, *y;
+        while (node != T_NIL) {
+            if (node->value == key)
+                z = node;
 
-            if (cvor->vrijednost <= kljuc)
-                cvor = cvor->desni;
+            if (node->value <= key)
+                node = node->right;
             else
-                cvor = cvor->lijevi;
+                node = node->left;
         }
         if (z == T_NIL) {
-            cout << "Kljuc nije pronadjen u stablu." << endl;
+            cout << "Key not found in tree." << endl;
             return;
         }
         y = z;
-        auto y_original_boja = y->boja;
-        if (z->lijevi == T_NIL) {
-            x = z->desni;
-            RBTransplant(z, z->desni);
+        auto yOriginalColor = y->color;
+        if (z->left == T_NIL) {
+            x = z->right;
+            RBTransplant(z, z->right);
         }
-        else if (z->desni == T_NIL) {
-            x = z->lijevi;
-            RBTransplant(z, z->lijevi);
+        else if (z->right == T_NIL) {
+            x = z->left;
+            RBTransplant(z, z->left);
         }
         else {
-            y = tree_minimum(z->desni);
-            y_original_boja = y->boja;
-            x = y->desni;
-            if (y->roditelj == z)
-                x->roditelj = y;
+            y = tree_minimum(z->right);
+            yOriginalColor = y->color;
+            x = y->right;
+            if (y->parent == z)
+                x->parent = y;
             else {
-                RBTransplant(y, y->desni);
-                y->desni = z->desni;
-                y->desni->roditelj = y;
+                RBTransplant(y, y->right);
+                y->right = z->right;
+                y->right->parent = y;
             }
             RBTransplant(z,y);
-            y->lijevi = z->lijevi;
-            y->lijevi->roditelj = y;
-            y->boja = z->boja;
+            y->left = z->left;
+            y->left->parent = y;
+            y->color = z->color;
         }
         delete z;
-        if (!y_original_boja) {
+        if (!yOriginalColor) {
             RBDeleteFixup(x);
         }
-        cout << endl << "Element uspjesno izbrisan!" << endl;
-    }
-
-    Cvor<Tip>* root() {
-        return korijen;
+        cout << endl << "Node successfully deleted!" << endl;
     }
 
     void printTree() {
-        if (korijen) {
-            printHelper(korijen, "", true);
+        if (root) {
+            printHelper(root, "", true);
         }
     }
 
-    Cvor<Tip>* RBSearch(Tip kljuc) {
-        return SearchTreeHelper(korijen,kljuc);
-    }
 };
 
 int main() {
     vector<string> meni;
-    meni.emplace_back("Ubacivanje elemenata");
-    meni.emplace_back("InOrder ispis");
-    meni.emplace_back("Brisanje elementa");
-    meni.emplace_back("Ispis stabla");
-    meni.emplace_back("Ubacivanje probnih elemenata iz postavke vjezbe");
-    meni.emplace_back("Brisanje probnih elemenata iz postavke vjezbe");
+    meni.emplace_back("Insertion of elements");
+    meni.emplace_back("InOrder print");
+    meni.emplace_back("Deletion of elements");
+    meni.emplace_back("Tree print");
+    meni.emplace_back("Default insertion");
+    meni.emplace_back("Default deletion");
     meni.emplace_back("EXIT");
 
     RBStablo<int> stablo;
@@ -335,34 +320,34 @@ int main() {
         for (int i = 0; i < meni.size(); ++i)
             cout << i+1 << ". " << meni[i] << endl;
 
-        cout << "Unesite jednu od opcija: " << endl;
+        cout << "Choose an option: " << endl;
         int odabir;
         cin >> odabir;
         switch(odabir) {
             case 1:
                 int vrijednost;
-                cout << "Odabrali ste kreiranje cvora." << endl;
+                cout << "You have chosen node insertion" << endl;
                 for (;;) {
-                    cout << "Unesite vrijednost (bilo sta osim broja za izlaz): ";
+                    cout << "Insert value. (Insert anything except a number for insertion to end)";
                     cin.clear();
                     cin.ignore();
                     cin >> vrijednost;
                     if (cin.fail())
                         break;
                     stablo.RBInsert(vrijednost);
-                    cout << "Uspjesno uneseno " << vrijednost << " u stablo." << endl;
+                    cout << "Value " << vrijednost << " is successfuly inserted in tree." << endl;
                 }
                 break;
             case 2:
-                cout << endl << "Odabrali ste InOrder ispis stabla. "<< endl;
-                cout << "Clanovi su: ";
+                cout << endl << "You have chosen InOrder printout. "<< endl;
+                cout << "Members are: ";
                 stablo.inOrder();
                 cout << endl << endl;
                 break;
             case 3:
-                cout << "Odabrali ste brisanje cvora." << endl;
+                cout << "You have chosen node deletion." << endl;
                 for (;;) {
-                    cout << "Unesite vrijednost (bilo sta osim broja za izlaz): ";
+                    cout << "Insert value. (Insert anything except a number for insertion to end)";
                     cin.clear();
                     cin.ignore();
                     cin >> vrijednost;
@@ -372,22 +357,22 @@ int main() {
                 }
                 break;
             case 4:
-                cout << endl << "Odabrali ste ispis stabla." << endl;
+                cout << endl << "You have chosen tree printout." << endl;
                 stablo.printTree();
                 cout << endl;
                 break;
             case 5:
-                cout << "Odabrali ste unos elemenata iz postavke vjezbe." << endl;
+                cout << "You have chosen default insertion" << endl;
                 for (auto x: vector<int>{6,11,10,2,9,7,5,13,22,27,36,12,31})
                     stablo.RBInsert(x);
                 break;
             case 6:
-                cout << "Odabrali ste brisanje elemenata iz postavke vjezbe." << endl;
+                cout << "You have chosen default deletion." << endl;
                 for (auto x: vector<int>{5,27,36,12,11})
                     stablo.RBDelete(x);
                 break;
             case 7:
-                cout << "Dosli ste do kraja programa. Dovidjenja!" << endl;
+                cout << "Thank you for your time. Goodbye!" << endl;
                 return 0;
             default:
                 cout << "Pogresna komanda! Pokusajte opet." << endl;
