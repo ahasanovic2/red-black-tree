@@ -186,11 +186,11 @@ class RBStablo {
         auto y = x->lijevi;
         x->lijevi = y->desni;
         if (y->desni != T_NIL)
-            y->lijevi->roditelj = y;
+            y->desni->roditelj = x;
         y->roditelj = x->roditelj;
         if (x->roditelj == nullptr)
             korijen = y;
-        else if (x == y->roditelj->desni)
+        else if (x == x->roditelj->desni)
             x->roditelj->desni = y;
         else
             x->roditelj->lijevi = y;
